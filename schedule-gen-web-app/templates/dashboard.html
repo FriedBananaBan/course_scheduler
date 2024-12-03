@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ current_user.username }}</h1>
+
+    <h2>Your Courses</h2>
+    <ul>
+        {% for course in courses %}
+        <li>
+            {{ course.title }} - {{ course.professor }} - ({{ ', '.join(course.days) }}) - {{ course.start_time, course.end_time }} - {{ course.course_credits }} credits - Priority: {{ course.priority }}
+            <form method="POST" action="/delete_course/{{ course.id }}" style="display: inline;">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/add_course">Add a Course</a>
+
+    <h2>Your Schedules</h2>
+    <ul>
+        {% for schedule in schedules %}
+        <li>
+            <span>{{ schedule.name }} - Total Credits: {{ schedule.total_credits }}</span>
+            <ul>
+                {% for course in schedule.courses %}
+                <li>
+                    <span>{{ course.title }} - {{ course.professor }} - ({{ ', '.join(course.days) }}) - {{ course.start_time, course.end_time }} - {{ course.course_credits }} credits - Priority: {{ course.priority }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <form method="POST" action="/generate_schedules">
+        <button type="submit">Generate Schedules</button>
+    </form>
+
+    <a href="/logout">Logout</a>
+</body>
+</html>
