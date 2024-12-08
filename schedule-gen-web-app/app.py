@@ -1,23 +1,33 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from pymongo import MongoClient
 from mongoengine import Document, StringField, ListField, ReferenceField, IntField, BooleanField, DateTimeField, connect
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from dotenv import load_dotenv
 from itertools import combinations
 import os
 
 
 def create_app():
-    app = Flask(__name__)
-    app.secret_key = "KEY"
+    load_dotenv()
 
-    # MongoEngine Configuration
+    app = Flask(__name__, template_folder='templates')
+    app.secret_key = os.getenv("SECRET_KEY")
+
+    client = MongoClient(os.getenv("MONGO_URI"))
+    db = client["schedule_db"]
+
     connect(
-        db=os.getenv("DB_NAME", "project_5"),
-        host=os.getenv("DB_URI", "mongodb://localhost:27017/project_5")
+        db=os.getenv('MONGO_DB_NAME'),
+        username=os.getenv('MONGO_USERNAME'),
+        password=os.getenv('MONGO_PASSWORD'),
+        host=os.getenv('MONGO_HOST'),
+        authentication_source='admin'
     )
 
-    login_manager = LoginManager(app)
+    login_manager = LoginManager()
+    login_manager.init_app(app)
     login_manager.login_view = "login"
 
     # MongoEngine Schemas
