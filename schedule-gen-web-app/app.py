@@ -8,8 +8,39 @@ from dotenv import load_dotenv
 from itertools import combinations
 import os
 
+# MongoEngine Schemas
+class User(Document, UserMixin):
+    username = StringField(required=True, unique=True)
+    password = StringField(required=True)
+    schedules = ListField(ReferenceField("Schedule"))
+    courses = ListField(ReferenceField("Course"))
 
-def create_app():
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
+
+class Course(Document):
+    user = ReferenceField(User, required=True)
+    title = StringField(required=True)
+    professor = StringField(required=True)
+    days = ListField(StringField(), required=True)
+    start_time = StringField(required=True)
+    end_time = StringField(required=True)
+    course_credits = IntField(required=True)
+    priority = BooleanField(default=False)
+    created_at = DateTimeField(default=datetime.utcnow)
+
+class Schedule(Document):
+    user = ReferenceField(User, required=True)
+    name = StringField(required=True)
+    courses = ListField(ReferenceField(Course))
+    priority_count = IntField(default=0)
+    total_credits = IntField(default=0)
+    created_at = DateTimeField(default=datetime.utcnow)
+
+def create_app(testing=False):
     load_dotenv()
 
     app = Flask(__name__, template_folder='templates')
@@ -18,49 +49,22 @@ def create_app():
     client = MongoClient(os.getenv("MONGO_URI"))
     db = client["schedule_db"]
 
-    connect(
-        db=os.getenv('MONGO_DB_NAME'),
-        username=os.getenv('MONGO_USERNAME'),
-        password=os.getenv('MONGO_PASSWORD'),
-        host=os.getenv('MONGO_HOST'),
-        authentication_source='admin'
-    )
+    app.config['TESTING'] = testing
+    
+    if not testing:
+        connect(
+            db=os.getenv('MONGO_DB_NAME'),
+            username=os.getenv('MONGO_USERNAME'),
+            password=os.getenv('MONGO_PASSWORD'),
+            host=os.getenv('MONGO_HOST'),
+            authentication_source='admin'
+        )
 
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "login"
 
-    # MongoEngine Schemas
-    class User(Document, UserMixin):
-        username = StringField(required=True, unique=True)
-        password = StringField(required=True)
-        schedules = ListField(ReferenceField("Schedule"))
-        courses = ListField(ReferenceField("Course"))
-
-        def set_password(self, password):
-            self.password = generate_password_hash(password)
-
-        def check_password(self, password):
-            return check_password_hash(self.password, password)
-
-    class Course(Document):
-        user = ReferenceField(User, required=True)
-        title = StringField(required=True)
-        professor = StringField(required=True)
-        days = ListField(StringField(), required=True)
-        start_time = StringField(required=True)
-        end_time = StringField(required=True)
-        course_credits = IntField(required=True)
-        priority = BooleanField(default=False)
-        created_at = DateTimeField(default=datetime.utcnow)
-
-    class Schedule(Document):
-        user = ReferenceField(User, required=True)
-        name = StringField(required=True)
-        courses = ListField(ReferenceField(Course))
-        priority_count = IntField(default=0)
-        total_credits = IntField(default=0)
-        created_at = DateTimeField(default=datetime.utcnow)
+    
 
     ######################### Helper Functions #########################
     # Helper function to parse time strings in "HH:mm" format to minutes
