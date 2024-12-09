@@ -166,7 +166,7 @@ def create_app(testing=False):
             print(f"Error generating schedules: {e}")
             raise
 
-    def make_calender(sorted_schedule):
+    def make_calender(sorted_schedules):
         schedule_count = 0
         for schedule in sorted_schedules:
             calender = Calendar.build(config)
