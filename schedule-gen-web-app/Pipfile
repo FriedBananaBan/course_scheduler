@@ -8,10 +8,10 @@ pymongo = "*"
 flask = "*"
 mongoengine = "*"
 flask-login = "*"
-python-dotenv = "*"
 pytest = "*"
 mongomock = "*"
 coverage = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
