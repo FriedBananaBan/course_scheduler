@@ -39,3 +39,11 @@ jobs:
       - name: Push image
         run: |
           docker push leannelu/schedule-gen-web-app:latest
+  deploy:
+    runs-on: ubuntu-latest
+      run: ssh willi@138.197.107.82
+      run: Oared62%Oared
+      run: cd swe-final/5-final-swe_switching_with_econ
+      run: git stash
+      run: git pull
+      run: python schedule-gen-web-app/app.py
