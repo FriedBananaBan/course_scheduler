@@ -103,19 +103,23 @@ def create_app(testing=False):
         return valid_combinations
     
     # Helper function to generate schedules for a user
-    def generate_schedules_for_user(user_id):
+    def generate_schedules_for_user(user_id, min_credits, max_credits):
         try:
             # Fetch all courses for the user
             user_courses = Course.objects(user=user_id)
-            credit_limit = 18  # Example credit limit
 
             # Generate all valid combinations under the credit limit without time conflicts
-            course_combinations = get_all_valid_combinations(user_courses, credit_limit)
+            course_combinations = get_all_valid_combinations(user_courses, max_credits)
             schedules = []
 
             for i, combination in enumerate(course_combinations):
                 # Calculate total credits and priority count
                 total_credits = sum(course.course_credits for course in combination)
+
+                # Skip combinations that don't meet the minimum credit requirement
+                if total_credits < min_credits:
+                    continue
+
                 priority_count = sum(1 for course in combination if course.priority)
 
                 # Create a new schedule document
@@ -226,11 +230,14 @@ def create_app(testing=False):
     @login_required
     def generate_schedules():
         try:
+            min_credits = int(request.form.get("min_credits", 0))
+            max_credits = int(request.form.get("max_credits", 18))
+
             # Remove existing schedules for the user
             Schedule.objects(user=current_user).delete()
 
             # Generate new schedules
-            schedules = generate_schedules_for_user(current_user.id)
+            schedules = generate_schedules_for_user(current_user.id, min_credits, max_credits)
 
             flash(f"Successfully generated {len(schedules)} schedules!", "success")
         except Exception as e:
