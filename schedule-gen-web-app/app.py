@@ -166,7 +166,28 @@ def create_app(testing=False):
             print(f"Error generating schedules: {e}")
             raise
 
-
+    def make_calender(schedule):
+        schedule_count = 0
+        for schedule in sorted_schedules:
+            calender = Calendar.build(config)
+            for course in schedule.courses:
+                if isinstance(course, DBRef):
+                    course = db.dereference(course)
+                print(course.days)
+                for day in course.days:
+                    if day == "Monday":
+                        calender.add_event(day_of_week=0, start=course.start_time, end=course.end_time, title=course.title)       
+                    if day == "Tuesday":
+                        calender.add_event(day_of_week=1, start=course.start_time, end=course.end_time, title=course.title)
+                    if day == "Wednesday":
+                        calender.add_event(day_of_week=2, start=course.start_time, end=course.end_time, title=course.title)
+                    if day == "Thursday":
+                        calender.add_event(day_of_week=3, start=course.start_time, end=course.end_time, title=course.title)
+                    if day == "Friday":
+                        calender.add_event(day_of_week=4, start=course.start_time, end=course.end_time, title=course.title)
+            calender.save("static/schedule"+str(schedule_count)+".png")
+            print("Calender saved")
+            schedule_count+=1
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -216,30 +237,6 @@ def create_app(testing=False):
     def dashboard():
         user_courses = Course.objects(user=current_user)
         sorted_schedules = Schedule.objects(user=current_user).order_by("-priority_count", "-total_credits")
-        
-        schedule_count = 0
-        for schedule in sorted_schedules:
-            calender = Calendar.build(config)
-            for course in schedule.courses:
-                if isinstance(course, DBRef):
-                    course = db.dereference(course)
-                print(course.days)
-                for day in course.days:
-                    if day == "Monday":
-                        calender.add_event(day_of_week=0, start=course.start_time, end=course.end_time, title=course.title)       
-                    if day == "Tuesday":
-                        calender.add_event(day_of_week=1, start=course.start_time, end=course.end_time, title=course.title)
-                    if day == "Wednesday":
-                        calender.add_event(day_of_week=2, start=course.start_time, end=course.end_time, title=course.title)
-                    if day == "Thursday":
-                        calender.add_event(day_of_week=3, start=course.start_time, end=course.end_time, title=course.title)
-                    if day == "Friday":
-                        calender.add_event(day_of_week=4, start=course.start_time, end=course.end_time, title=course.title)
-            calender.save("static/schedule"+str(schedule_count)+".png")
-            print("Calender saved")
-            schedule_count+=1
-            
-
         return render_template("dashboard.html", courses=user_courses, schedules=sorted_schedules)
 
     @app.route("/add_course", methods=["GET", "POST"])
@@ -268,9 +265,10 @@ def create_app(testing=False):
     @login_required
     def delete_course(course_id):
         course = Course.objects(id=course_id, user=current_user).first()
+        print("Removing " + course.title)
         if course:
             course.delete()
-            current_user.courses = [c for c in current_user.courses if c.id != course.id]
+            current_user.courses = [c for c in current_user.courses if not (isinstance(c, DBRef)) and str(c.id) == str(course.id)]
             current_user.save()
             flash("Course deleted successfully!", "success")
         else:
@@ -289,6 +287,10 @@ def create_app(testing=False):
 
             # Generate new schedules
             schedules = generate_schedules_for_user(current_user.id, min_credits, max_credits)
+            user_courses = Course.objects(user=current_user)
+            sorted_schedules = Schedule.objects(user=current_user).order_by("-priority_count", "-total_credits")
+            make_calender(sorted_schedules)
+
 
             flash(f"Successfully generated {len(schedules)} schedules!", "success")
         except Exception as e:
