@@ -19,6 +19,7 @@ def mock_db():
 def app(mock_db):
     # Explicitly pass `TESTING=True` to the app instance
     app = create_app(testing=True)
+    app.secret_key = "KEY"
     app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF protection for testing
     return app
 
