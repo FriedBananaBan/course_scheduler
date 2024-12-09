@@ -33,6 +33,8 @@ docker compose up
 ```
 3. Once the build finishes, follow the link to [localhost:3000](http://localhost:3000/).
 
+## [Deployed Website](http://138.197.107.82:3000/)
+
 ## Team
 - [Terry Cao](https://github.com/cao-exe)
 - [Leanne Lu](https://github.com/leannelu)
