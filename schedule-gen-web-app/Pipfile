@@ -12,6 +12,7 @@ pytest = "*"
 mongomock = "*"
 coverage = "*"
 python-dotenv = "*"
+calender-view = "*"
 
 [dev-packages]
 
