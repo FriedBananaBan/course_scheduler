@@ -300,6 +300,9 @@ def create_app(testing=False):
 
     return app
 
-app = create_app()
-FLASK_PORT = 3000
-app.run(host="0.0.0.0", port=FLASK_PORT, debug=True)
+if __name__ == "__main__":
+    app = create_app()
+    FLASK_PORT = 3000
+    app.run(host="0.0.0.0", port=FLASK_PORT, debug=True)
+else:
+    app = create_app()
