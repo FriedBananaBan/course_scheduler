@@ -166,7 +166,7 @@ def create_app(testing=False):
             print(f"Error generating schedules: {e}")
             raise
 
-    def make_calender(schedule):
+    def make_calender(sorted_schedule):
         schedule_count = 0
         for schedule in sorted_schedules:
             calender = Calendar.build(config)
@@ -300,7 +300,6 @@ def create_app(testing=False):
 
     return app
 
-if __name__ == "__main__":
-    app = create_app()
-    FLASK_PORT = 3000
-    app.run(host="0.0.0.0", port=FLASK_PORT, debug=True)
+app = create_app()
+FLASK_PORT = 3000
+app.run(host="0.0.0.0", port=FLASK_PORT, debug=True)
