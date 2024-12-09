@@ -62,7 +62,7 @@
                                 {% endfor %}
                             </ul>
                         {% else %}
-                            <p>No courses added yet. <a href="/add_course">Add a course</a>.</p>
+                            <p>No courses added yet.</p>
                         {% endif %}
                     </div>
                 </div>
@@ -87,6 +87,7 @@
                                     aria-labelledby="heading{{ schedule.id }}" data-bs-parent="#scheduleAccordion">
                                     <div class="accordion-body">
                                         <ul class="list-group">
+                                            <img src="{{ url_for('static', filename='schedule' ~ loop.index0 ~ '.png') }}" class="object-fit-contain border rounded">
                                             {% for course in schedule.courses %}
                                                 <li class="list-group-item">
                                                     <strong>{{ course.title }}</strong> - {{ course.professor }} <br>

@@ -7,6 +7,33 @@ from datetime import datetime
 from dotenv import load_dotenv
 from itertools import combinations
 import os
+from calendar_view.calendar import Calendar
+from calendar_view.core.config import CalendarConfig
+from calendar_view.core.event import Event
+from calendar_view.config import style
+from bson.dbref import DBRef
+
+from PIL import ImageFont
+from pkg_resources import resource_filename
+
+font_path: str = 'Roboto-Regular.ttf'
+
+def image_font(size: int):
+    path: str = resource_filename('calendar_view.resources.fonts', font_path)
+    return ImageFont.truetype(path, size)
+
+style.event_title_font = image_font(25)
+config = CalendarConfig(
+    lang='en',
+    title='Class Schedule',
+    dates='Mo - Fr',
+    hours='8 - 20',
+    mode=None,
+    show_date=False,
+    show_year=False,
+    legend=False,
+)
+
 
 # MongoEngine Schemas
 class User(Document, UserMixin):
@@ -189,6 +216,30 @@ def create_app(testing=False):
     def dashboard():
         user_courses = Course.objects(user=current_user)
         sorted_schedules = Schedule.objects(user=current_user).order_by("-priority_count", "-total_credits")
+        
+        schedule_count = 0
+        for schedule in sorted_schedules:
+            calender = Calendar.build(config)
+            for course in schedule.courses:
+                if isinstance(course, DBRef):
+                    course = db.dereference(course)
+                print(course.days)
+                for day in course.days:
+                    if day == "Monday":
+                        calender.add_event(day_of_week=0, start=course.start_time, end=course.end_time, title=course.title)       
+                    if day == "Tuesday":
+                        calender.add_event(day_of_week=1, start=course.start_time, end=course.end_time, title=course.title)
+                    if day == "Wednesday":
+                        calender.add_event(day_of_week=2, start=course.start_time, end=course.end_time, title=course.title)
+                    if day == "Thursday":
+                        calender.add_event(day_of_week=3, start=course.start_time, end=course.end_time, title=course.title)
+                    if day == "Friday":
+                        calender.add_event(day_of_week=4, start=course.start_time, end=course.end_time, title=course.title)
+            calender.save("static/schedule"+str(schedule_count)+".png")
+            print("Calender saved")
+            schedule_count+=1
+            
+
         return render_template("dashboard.html", courses=user_courses, schedules=sorted_schedules)
 
     @app.route("/add_course", methods=["GET", "POST"])
