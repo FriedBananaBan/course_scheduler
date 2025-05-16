@@ -11,7 +11,7 @@ A Flask web app for scheduling courses, allowing you to add courses and generate
 [Docker Hub Container Image](https://hub.docker.com/repository/docker/leannelu/schedule-gen-web-app/general)
 
 ## Deployed Website
-Access the live web app [here](http://138.197.107.82:3000/).
+This website is no longer being hosted.
 
 ## Running the App Locally
 To run the web app locally, follow these steps:
